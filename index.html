@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Evaluación Psicológica</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --rose: #f43f8e;
+  --rose-light: #fce7f3;
+  --rose-mid: #fbcfe8;
+  --rose-dark: #be185d;
+  --pink: #ec4899;
+  --blush: #fdf2f8;
+  --lavender: #f5f3ff;
+  --lavender-mid: #ede9fe;
+  --mint: #f0fdf4;
+  --peach: #fff7ed;
+  --sand: #fef3c7;
+  --text: #3b1f2b;
+  --text-mid: #6b3d52;
+  --text-soft: #9d6b80;
+  --border: #f9c8df;
+  --white: #ffffff;
+  --sidebar-w: 240px;
+  --shadow: 0 4px 24px rgba(244,63,142,.10);
+  --shadow-sm: 0 2px 8px rgba(244,63,142,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--blush);color:var(--text);min-height:100vh;display:flex}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#fce7f3 0%,#f5f3ff 100%);border-right:1.5px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:50;transition:transform .3s}
+.sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.logo-icon{width:48px;height:48px;background:linear-gradient(135deg,#f43f8e,#a855f7);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;box-shadow:0 4px 12px rgba(244,63,142,.3)}
+.logo-icon svg{width:28px;height:28px;fill:white}
+.logo-title{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--rose-dark);line-height:1.3}
+.logo-sub{font-size:10px;color:var(--text-soft);margin-top:2px}
+.nav{flex:1;padding:16px 12px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-mid);transition:all .2s;margin-bottom:4px;border:none;background:none;width:100%;text-align:left}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;opacity:.7}
+.nav-item:hover{background:rgba(244,63,142,.08);color:var(--rose)}
+.nav-item.active{background:linear-gradient(135deg,rgba(244,63,142,.15),rgba(168,85,247,.1));color:var(--rose);font-weight:600}
+.nav-item.active svg{opacity:1}
+.nav-section{font-size:10px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.8px;padding:14px 14px 6px;margin-top:6px}
+.sidebar-footer{padding:16px 12px;border-top:1px solid var(--border)}
+.user-info{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(244,63,142,.07);border-radius:12px}
+.user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#f43f8e,#a855f7);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.user-name{font-size:12px;font-weight:600;color:var(--text)}
+.user-role{font-size:10px;color:var(--text-soft)}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:white;border-bottom:1.5px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;box-shadow:var(--shadow-sm)}
+.page-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text)}
+.page-sub{font-size:12px;color:var(--text-soft);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--blush);border:1.5px solid var(--border);border-radius:10px;padding:7px 14px;font-size:13px;color:var(--text-mid);width:220px}
+.search-box input{border:none;background:none;outline:none;font-size:13px;color:var(--text);width:100%;font-family:'DM Sans',sans-serif}
+.search-box input::placeholder{color:var(--text-soft)}
+.btn{border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;border-radius:10px;transition:all .2s;display:inline-flex;align-items:center;gap:6px;font-size:13px}
+.btn-primary{background:linear-gradient(135deg,#f43f8e,#ec4899);color:#fff;padding:9px 18px;box-shadow:0 4px 12px rgba(244,63,142,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(244,63,142,.35)}
+.btn-secondary{background:var(--rose-light);color:var(--rose-dark);padding:8px 16px;border:1.5px solid var(--rose-mid)}
+.btn-secondary:hover{background:var(--rose-mid)}
+.btn-ghost{background:none;color:var(--text-mid);padding:8px 12px}
+.btn-ghost:hover{background:var(--blush);color:var(--rose)}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px}
+.btn-danger{background:#fff0f3;color:#e11d48;border:1.5px solid #fecdd3;padding:7px 14px}
+.btn-danger:hover{background:#fecdd3}
+
+/* ── CONTENT ── */
+.content{padding:28px;flex:1}
+.page{display:none}.page.active{display:block}
+
+/* ── CARDS ── */
+.card{background:white;border-radius:16px;border:1.5px solid var(--border);box-shadow:var(--shadow-sm);padding:20px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--text)}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:white;border-radius:16px;padding:18px;border:1.5px solid var(--border);box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-card.s1::before{background:linear-gradient(90deg,#f43f8e,#ec4899)}
+.stat-card.s2::before{background:linear-gradient(90deg,#a855f7,#8b5cf6)}
+.stat-card.s3::before{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.stat-card.s4::before{background:linear-gradient(90deg,#10b981,#34d399)}
+.stat-emoji{font-size:22px;margin-bottom:8px}
+.stat-val{font-size:28px;font-weight:700;color:var(--text);line-height:1}
+.stat-label{font-size:11px;color:var(--text-soft);margin-top:4px}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto;border-radius:12px;border:1.5px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:linear-gradient(135deg,#fce7f3,#f5f3ff)}
+th{padding:12px 16px;text-align:left;font-weight:700;color:var(--text-mid);font-size:11px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+td{padding:12px 16px;border-top:1px solid #fce7f3;color:var(--text);vertical-align:middle}
+tr:hover td{background:#fdf8fc}
+.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;display:inline-block}
+.badge-rose{background:#fce7f3;color:#be185d}
+.badge-purple{background:#f5f3ff;color:#7c3aed}
+.badge-green{background:#f0fdf4;color:#065f46}
+.badge-amber{background:#fffbeb;color:#92400e}
+.badge-blue{background:#eff6ff;color:#1e40af}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(59,31,43,.4);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:white;border-radius:20px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(244,63,142,.2);animation:modalIn .25s ease}
+@keyframes modalIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-header{padding:22px 24px 0;display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--text)}
+.modal-close{background:var(--blush);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;color:var(--text-soft);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-close:hover{background:var(--rose-mid);color:var(--rose-dark)}
+.modal-body{padding:20px 24px 24px}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--text-mid);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+.form-input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;background:var(--blush);transition:border-color .2s;outline:none}
+.form-input:focus{border-color:var(--rose);background:white}
+textarea.form-input{resize:vertical;min-height:80px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;padding-top:8px}
+
+/* ── CARPETA ── */
+.carpeta-header{background:linear-gradient(135deg,#fce7f3,#f5f3ff);border-radius:16px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--border)}
+.paciente-avatar{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#f43f8e,#a855f7);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 4px 12px rgba(244,63,142,.3)}
+.paciente-info h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text)}
+.paciente-info p{font-size:12px;color:var(--text-soft);margin-top:3px}
+.carpeta-tabs{display:flex;gap:4px;background:var(--rose-light);border-radius:12px;padding:4px;margin-bottom:20px;flex-wrap:wrap}
+.carpeta-tab{padding:8px 16px;border-radius:9px;font-size:13px;font-weight:500;color:var(--text-mid);cursor:pointer;transition:all .2s;border:none;background:none;display:flex;align-items:center;gap:6px}
+.carpeta-tab.active{background:white;color:var(--rose);font-weight:700;box-shadow:0 2px 8px rgba(244,63,142,.12)}
+.carpeta-tab:hover:not(.active){background:rgba(244,63,142,.07)}
+.carpeta-section{display:none}.carpeta-section.active{display:block}
+
+/* ── INFO GRID ── */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.info-item{background:var(--blush);border-radius:10px;padding:12px 16px;border:1px solid var(--border)}
+.info-item-label{font-size:10px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.info-item-val{font-size:13px;font-weight:600;color:var(--text)}
+.info-item.full{grid-column:1/-1}
+
+/* ── NOTAS ── */
+.nota-card{background:var(--sand);border:1px solid #fde68a;border-radius:12px;padding:14px 16px;margin-bottom:10px;position:relative}
+.nota-fecha{font-size:11px;color:#92400e;font-weight:600;margin-bottom:6px}
+.nota-texto{font-size:13px;color:var(--text);line-height:1.6}
+.nota-card.morada{background:var(--lavender);border-color:#ddd6fe}
+.nota-card.morada .nota-fecha{color:#6d28d9}
+
+/* ── PRUEBAS ── */
+.prueba-card{background:white;border:1.5px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;transition:all .2s}
+.prueba-card:hover{border-color:var(--rose);box-shadow:var(--shadow-sm)}
+.prueba-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.prueba-name{font-size:13px;font-weight:700;color:var(--text)}
+.prueba-desc{font-size:11px;color:var(--text-soft);margin-top:2px}
+
+/* ── RESULTADO ── */
+.resultado-score{text-align:center;padding:24px;background:linear-gradient(135deg,#fce7f3,#f5f3ff);border-radius:16px;margin-bottom:16px}
+.score-num{font-family:'Playfair Display',serif;font-size:52px;font-weight:700;color:var(--rose)}
+.score-label{font-size:13px;color:var(--text-soft);margin-top:4px}
+.score-nivel{display:inline-block;padding:6px 18px;border-radius:20px;font-weight:700;font-size:13px;margin-top:8px}
+.nivel-leve{background:#f0fdf4;color:#065f46}
+.nivel-moderado{background:#fffbeb;color:#92400e}
+.nivel-severo{background:#fef2f2;color:#991b1b}
+
+/* ── HISTORIAL TABLE ── */
+.historial-row{display:flex;align-items:center;gap:14px;padding:12px 16px;background:white;border-radius:12px;border:1px solid var(--border);margin-bottom:8px;transition:all .2s}
+.historial-row:hover{border-color:var(--rose);transform:translateX(3px)}
+
+/* ── CALENDARIO ── */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:12px}
+.cal-header-day{text-align:center;font-size:11px;font-weight:700;color:var(--text-soft);padding:6px 0;text-transform:uppercase}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:all .2s;position:relative}
+.cal-day:hover{background:var(--rose-mid);color:var(--rose-dark)}
+.cal-day.today{background:linear-gradient(135deg,#f43f8e,#ec4899);color:white;font-weight:700}
+.cal-day.has-event::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--rose)}
+.cal-day.other-month{color:#d1b5c0}
+.cal-day.selected{background:var(--rose-light);color:var(--rose-dark);font-weight:600}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,#f43f8e,#ec4899);color:white;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;box-shadow:0 8px 24px rgba(244,63,142,.3)}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ── LOADING ── */
+.loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--text-soft);font-size:13px;gap:10px}
+.spinner{width:18px;height:18px;border:2px solid var(--rose-mid);border-top-color:var(--rose);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:48px 20px;color:var(--text-soft)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.empty h3{font-size:15px;font-weight:600;color:var(--text-mid);margin-bottom:6px}
+.empty p{font-size:13px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .form-row{grid-template-columns:1fr}
+  .info-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <!-- Símbolo de Psicología (Psi) -->
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C8.5 2 6 4.5 6 8c0 2.8 1.5 5.2 3.8 6.5L9 20h2v2h2v-2h2l-.8-5.5C16.5 13.2 18 10.8 18 8c0-3.5-2.5-6-6-6zm0 2c2.2 0 4 1.8 4 4 0 2.5-1.8 4.6-4.2 5.4L12 20h-1l.8-6.6C9.6 12.6 8 10.5 8 8c0-2.2 1.8-4 4-4z" fill="white"/>
+        <rect x="11" y="18" width="2" height="4" rx="1" fill="white"/>
+        <rect x="8" y="20" width="8" height="2" rx="1" fill="white"/>
+      </svg>
+    </div>
+    <div class="logo-title">Sistema de Evaluación<br>Psicológica</div>
+    <div class="logo-sub">Portal Profesional</div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section">Principal</div>
+    <button class="nav-item active" onclick="showPage('pacientes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Pacientes
+    </button>
+    <button class="nav-item" onclick="showPage('calendario',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Calendario
+    </button>
+    <button class="nav-item" onclick="showPage('reportes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Reportes
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">Ps</div>
+      <div>
+        <div class="user-name">Psicólogo/a</div>
+        <div class="user-role">Administrador</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="pageTitle">Pacientes</div>
+      <div class="page-sub" id="pageSub">Lista de pacientes registrados</div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9d6b80" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="Buscar paciente..." oninput="buscarPaciente(this.value)">
+      </div>
+      <button class="btn btn-primary" id="btnNuevo" onclick="abrirModalPaciente()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo Paciente
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ===== PAGE: PACIENTES ===== -->
+    <div class="page active" id="page-pacientes">
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card s1"><div class="stat-emoji">👥</div><div class="stat-val" id="statTotal">0</div><div class="stat-label">Total Pacientes</div></div>
+        <div class="stat-card s2"><div class="stat-emoji">📅</div><div class="stat-val" id="statMes">0</div><div class="stat-label">Registrados este mes</div></div>
+        <div class="stat-card s3"><div class="stat-emoji">📋</div><div class="stat-val" id="statSesiones">0</div><div class="stat-label">Sesiones totales</div></div>
+        <div class="stat-card s4"><div class="stat-emoji">✅</div><div class="stat-val" id="statNotas">0</div><div class="stat-label">Notas registradas</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Lista de Pacientes</div>
+          <span class="badge badge-rose" id="countBadge">0 pacientes</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Código</th><th>Nombre</th><th>Edad</th>
+              <th>F. Nacimiento</th><th>F. Registro</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="pacientesBody">
+              <tr><td colspan="6"><div class="loading"><div class="spinner"></div> Cargando pacientes...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: CARPETA ===== -->
+    <div class="page" id="page-carpeta">
+      <button class="btn btn-ghost btn-sm" onclick="showPage('pacientes'); document.querySelector('.nav-item').click()" style="margin-bottom:16px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Volver a Pacientes
+      </button>
+
+      <div class="carpeta-header">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="paciente-avatar" id="carpetaAvatar">?</div>
+          <div class="paciente-info">
+            <h2 id="carpetaNombre">—</h2>
+            <p id="carpetaMeta">—</p>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="editarPacienteActual()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Editar
+        </button>
+      </div>
+
+      <div class="carpeta-tabs">
+        <button class="carpeta-tab active" onclick="showSection('info',this)">👤 Información</button>
+        <button class="carpeta-tab" onclick="showSection('pruebas',this)">🧪 Pruebas</button>
+        <button class="carpeta-tab" onclick="showSection('resultados',this)">📊 Resultados</button>
+        <button class="carpeta-tab" onclick="showSection('sesiones',this)">📅 Sesiones</button>
+        <button class="carpeta-tab" onclick="showSection('notas',this)">📝 Notas</button>
+      </div>
+
+      <!-- INFO -->
+      <div class="carpeta-section active" id="section-info">
+        <div class="info-grid" id="infoGrid"></div>
+      </div>
+
+      <!-- PRUEBAS -->
+      <div class="carpeta-section" id="section-pruebas">
+        <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:13px;color:var(--text-soft)">Selecciona una prueba para aplicar al paciente</div>
+        </div>
+        <div id="pruebasList"></div>
+      </div>
+
+      <!-- PRUEBA EN CURSO -->
+      <div class="carpeta-section" id="section-prueba-activa">
+        <div class="card" id="pruebaActivaCard"></div>
+      </div>
+
+      <!-- RESULTADOS -->
+      <div class="carpeta-section" id="section-resultados">
+        <div id="resultadosContent">
+          <div class="empty"><div class="empty-icon">📊</div><h3>Sin resultados aún</h3><p>Aplica una prueba para ver resultados aquí</p></div>
+        </div>
+      </div>
+
+      <!-- SESIONES -->
+      <div class="carpeta-section" id="section-sesiones">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+          <button class="btn btn-primary btn-sm" onclick="abrirModalSesion()">+ Nueva Sesión</button>
+        </div>
+        <div id="sesionesList"><div class="empty"><div class="empty-icon">📅</div><h3>Sin sesiones</h3><p>Registra la primera sesión del paciente</p></div></div>
+      </div>
+
+      <!-- NOTAS -->
+      <div class="carpeta-section" id="section-notas">
+        <div style="margin-bottom:14px">
+          <textarea class="form-input" id="notaTexto" placeholder="Escribe una nota clínica..." rows="3"></textarea>
+          <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="guardarNota()">Guardar Nota</button>
+        </div>
+        <div id="notasList"><div class="empty"><div class="empty-icon">📝</div><h3>Sin notas</h3><p>Agrega notas clínicas del paciente</p></div></div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: CALENDARIO ===== -->
+    <div class="page" id="page-calendario">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title" id="calMesAnio">Mayo 2026</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="cambiarMes(-1)">‹</button>
+            <button class="btn btn-ghost btn-sm" onclick="cambiarMes(1)">›</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+      <div style="margin-top:16px" id="calEventos"></div>
+    </div>
+
+    <!-- ===== PAGE: REPORTES ===== -->
+    <div class="page" id="page-reportes">
+      <div class="stats-grid">
+        <div class="stat-card s1"><div class="stat-emoji">👥</div><div class="stat-val" id="rStatTotal">0</div><div class="stat-label">Total Pacientes</div></div>
+        <div class="stat-card s2"><div class="stat-emoji">📋</div><div class="stat-val" id="rStatSesiones">0</div><div class="stat-label">Sesiones</div></div>
+        <div class="stat-card s3"><div class="stat-emoji">🧪</div><div class="stat-val">5</div><div class="stat-label">Pruebas disponibles</div></div>
+        <div class="stat-card s4"><div class="stat-emoji">📝</div><div class="stat-val" id="rStatNotas">0</div><div class="stat-label">Notas clínicas</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Distribución de Pacientes por Edad</div></div>
+        <div style="position:relative;height:280px"><canvas id="reporteChart" role="img" aria-label="Distribución por edad"></canvas></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL NUEVO/EDITAR PACIENTE -->
+<div class="modal-overlay" id="modalPaciente">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalPacienteTitulo">Nuevo Paciente</div>
+      <button class="modal-close" onclick="cerrarModal('modalPaciente')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editPacienteId">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nombre completo *</label>
+          <input class="form-input" id="pNombre" placeholder="Ana Pérez López">
+        </div>
+        <div class="form-group">
+          <label class="form-label">DNI</label>
+          <input class="form-input" id="pDni" placeholder="12345678">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Fecha de Nacimiento</label>
+          <input class="form-input" type="date" id="pFechaNac">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Edad</label>
+          <input class="form-input" type="number" id="pEdad" placeholder="25">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Motivo de Evaluación</label>
+        <textarea class="form-input" id="pMotivo" placeholder="Describe el motivo de consulta..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observaciones iniciales</label>
+        <textarea class="form-input" id="pObs" placeholder="Observaciones relevantes..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="cerrarModal('modalPaciente')">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarPaciente()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Guardar Paciente
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SESION -->
+<div class="modal-overlay" id="modalSesion">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nueva Sesión</div>
+      <button class="modal-close" onclick="cerrarModal('modalSesion')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Fecha *</label>
+          <input class="form-input" type="date" id="sFecha">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hora</label>
+          <input class="form-input" type="time" id="sHora">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo de sesión</label>
+        <select class="form-input" id="sTipo">
+          <option>Evaluación inicial</option>
+          <option>Seguimiento</option>
+          <option>Intervención</option>
+          <option>Cierre</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notas de la sesión</label>
+        <textarea class="form-input" id="sNotas" placeholder="Resumen de la sesión..." rows="3"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="cerrarModal('modalSesion')">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarSesion()">Guardar Sesión</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SUPABASE CONFIG ──────────────────────────────────────────
+const SUPA_URL = 'https://kajwjspihlgujxpijevd.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imthandqc3BpaGxndWp4cGlqZXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4ODczMzcsImV4cCI6MjA5NDQ2MzMzN30.7Z921eyD6_lM6vliKv7ShwwtJvM670bseVEK0sGlm3w';
+const H = {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=representation'};
+
+async function supa(method, table, body=null, query='') {
+  const url = `${SUPA_URL}/rest/v1/${table}${query}`;
+  const opts = { method, headers: H };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(url, opts);
+  if (!r.ok) { const e = await r.text(); throw new Error(e); }
+  return method === 'DELETE' ? null : r.json();
+}
+
+// ── STATE ────────────────────────────────────────────────────
+let pacientes = [];
+let pacienteActual = null;
+let sesionesActuales = [];
+let notasActuales = [];
+let pruebaActiva = null;
+let respuestasActuales = {};
+let calFecha = new Date();
+
+// ── PRUEBAS PSICOLÓGICAS ─────────────────────────────────────
+const PRUEBAS = {
+  BAI: {
+    nombre: 'Inventario de Ansiedad de Beck (BAI)',
+    desc: 'Evalúa el nivel de ansiedad',
+    emoji: '😰',
+    color: '#fce7f3',
+    preguntas: [
+      'Entumecimiento u hormigueo','Sensación de calor','Temblor en las piernas',
+      'Incapacidad de relajarse','Miedo a que suceda lo peor','Mareos o aturdimiento',
+      'Palpitaciones o aceleración del corazón','Sensación de inestabilidad',
+      'Terror o pánico','Nerviosismo','Sensación de ahogo','Temblores en las manos',
+      'Temblor generalizado','Miedo a perder el control','Dificultad para respirar',
+      'Miedo a morir','Sensación de miedo','Indigestión o molestias estomacales',
+      'Desmayos','Rubor facial','Sudoración (no debida al calor)'
+    ],
+    opciones: ['0 = En absoluto','1 = Levemente','2 = Moderadamente','3 = Severamente'],
+    interpretar: s => s<=7?{nivel:'Mínima',cls:'nivel-leve'}:s<=15?{nivel:'Leve',cls:'nivel-leve'}:s<=25?{nivel:'Moderada',cls:'nivel-moderado'}:{nivel:'Severa',cls:'nivel-severo'}
+  },
+  BDI: {
+    nombre: 'Inventario de Depresión de Beck (BDI-II)',
+    desc: 'Evalúa la depresión',
+    emoji: '😔',
+    color: '#f5f3ff',
+    preguntas: [
+      'Tristeza','Pesimismo','Fracaso','Pérdida de placer','Sentimientos de culpa',
+      'Sentimientos de castigo','Disconformidad con uno mismo','Autocrítica',
+      'Pensamientos suicidas','Llanto','Agitación','Pérdida de interés',
+      'Indecisión','Desvalorización','Pérdida de energía','Cambios en los hábitos de sueño',
+      'Irritabilidad','Cambios en el apetito','Dificultad de concentración',
+      'Cansancio o fatiga','Pérdida de interés en el sexo'
+    ],
+    opciones: ['0 = No','1 = Levemente','2 = Moderadamente','3 = Gravemente'],
+    interpretar: s => s<=13?{nivel:'Mínima',cls:'nivel-leve'}:s<=19?{nivel:'Leve',cls:'nivel-leve'}:s<=28?{nivel:'Moderada',cls:'nivel-moderado'}:{nivel:'Grave',cls:'nivel-severo'}
+  },
+  PSS: {
+    nombre: 'Escala de Estrés Percibido (PSS-10)',
+    desc: 'Evalúa el nivel de estrés percibido',
+    emoji: '😤',
+    color: '#fff7ed',
+    preguntas: [
+      '¿Ha sentido que no podía controlar las cosas?',
+      '¿Ha sentido incapaz de controlar lo importante?',
+      '¿Se ha sentido nervioso o estresado?',
+      '¿Ha manejado bien los problemas?',
+      '¿Ha sentido que las cosas iban bien?',
+      '¿Ha podido controlar el estrés?',
+      '¿Ha podido manejar sus irritaciones?',
+      '¿Ha sentido que estaba al top?',
+      '¿Se ha irritado por cosas fuera de control?',
+      '¿Ha sentido que las dificultades se acumulaban?'
+    ],
+    opciones: ['0 = Nunca','1 = Casi nunca','2 = A veces','3 = Bastante','4 = Muy frecuente'],
+    interpretar: s => s<=13?{nivel:'Bajo',cls:'nivel-leve'}:s<=26?{nivel:'Moderado',cls:'nivel-moderado'}:{nivel:'Alto',cls:'nivel-severo'}
+  }
+};
+
+// ── NAVIGATION ───────────────────────────────────────────────
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if (btn) {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const titles = {
+    pacientes: ['Pacientes','Lista de pacientes registrados'],
+    carpeta: ['Carpeta del Paciente','Información clínica completa'],
+    calendario: ['Calendario','Agenda de sesiones'],
+    reportes: ['Reportes','Estadísticas generales']
+  };
+  if (titles[name]) {
+    document.getElementById('pageTitle').textContent = titles[name][0];
+    document.getElementById('pageSub').textContent = titles[name][1];
+  }
+  const btnNuevo = document.getElementById('btnNuevo');
+  btnNuevo.style.display = name === 'pacientes' ? 'inline-flex' : 'none';
+  document.getElementById('searchInput').style.display = name === 'pacientes' ? 'block' : 'none';
+  if (name === 'reportes') renderReportes();
+  if (name === 'calendario') renderCalendario();
+}
+
+function showSection(name, btn) {
+  document.querySelectorAll('.carpeta-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.carpeta-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-'+name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'sesiones') cargarSesiones();
+  if (name === 'notas') cargarNotas();
+  if (name === 'pruebas') renderPruebas();
+  if (name === 'resultados') cargarResultados();
+}
+
+// ── PACIENTES ────────────────────────────────────────────────
+async function cargarPacientes() {
+  try {
+    pacientes = await supa('GET','pacientes','','?order=created_at.desc');
+    renderPacientes(pacientes);
+    actualizarStats();
+  } catch(e) {
+    document.getElementById('pacientesBody').innerHTML =
+      `<tr><td colspan="6"><div class="empty"><div class="empty-icon">⚠️</div><h3>Error de conexión</h3><p>Verifica tu conexión a Supabase</p></div></td></tr>`;
+  }
+}
+
+function renderPacientes(lista) {
+  const tbody = document.getElementById('pacientesBody');
+  document.getElementById('countBadge').textContent = lista.length + ' pacientes';
+  if (!lista.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><div class="empty-icon">🌸</div><h3>Sin pacientes aún</h3><p>Agrega tu primer paciente con el botón "Nuevo Paciente"</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = lista.map(p => `
+    <tr>
+      <td><span class="badge badge-rose">${p.codigo}</span></td>
+      <td><strong>${p.nombre}</strong></td>
+      <td>${p.edad || '—'}</td>
+      <td>${p.fecha_nacimiento ? new Date(p.fecha_nacimiento).toLocaleDateString('es-PE') : '—'}</td>
+      <td>${p.fecha_registro ? new Date(p.fecha_registro).toLocaleDateString('es-PE') : '—'}</td>
+      <td style="display:flex;gap:6px;align-items:center">
+        <button class="btn btn-primary btn-sm" onclick="abrirCarpeta('${p.id}')">Abrir Carpeta</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminarPaciente('${p.id}','${p.nombre}')">✕</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function actualizarStats() {
+  document.getElementById('statTotal').textContent = pacientes.length;
+  const hoy = new Date();
+  const mes = pacientes.filter(p => {
+    const d = new Date(p.created_at);
+    return d.getMonth() === hoy.getMonth() && d.getFullYear() === hoy.getFullYear();
+  }).length;
+  document.getElementById('statMes').textContent = mes;
+  try {
+    const ses = await supa('GET','sesiones','','?select=id');
+    document.getElementById('statSesiones').textContent = ses.length;
+    document.getElementById('rStatSesiones').textContent = ses.length;
+  } catch(e){}
+  try {
+    const not = await supa('GET','notas','','?select=id');
+    document.getElementById('statNotas').textContent = not.length;
+    document.getElementById('rStatNotas').textContent = not.length;
+  } catch(e){}
+  document.getElementById('rStatTotal').textContent = pacientes.length;
+}
+
+function buscarPaciente(q) {
+  const f = q.toLowerCase();
+  renderPacientes(pacientes.filter(p =>
+    p.nombre.toLowerCase().includes(f) || p.codigo.toLowerCase().includes(f)
+  ));
+}
+
+function generarCodigo() {
+  const num = (pacientes.length + 1).toString().padStart(3,'0');
+  return 'PAC-' + num;
+}
+
+function abrirModalPaciente(paciente=null) {
+  document.getElementById('editPacienteId').value = paciente ? paciente.id : '';
+  document.getElementById('modalPacienteTitulo').textContent = paciente ? 'Editar Paciente' : 'Nuevo Paciente';
+  document.getElementById('pNombre').value = paciente?.nombre || '';
+  document.getElementById('pDni').value = paciente?.dni || '';
+  document.getElementById('pFechaNac').value = paciente?.fecha_nacimiento || '';
+  document.getElementById('pEdad').value = paciente?.edad || '';
+  document.getElementById('pMotivo').value = paciente?.motivo_evaluacion || '';
+  document.getElementById('pObs').value = paciente?.observaciones || '';
+  document.getElementById('modalPaciente').classList.add('open');
+}
+
+async function guardarPaciente() {
+  const nombre = document.getElementById('pNombre').value.trim();
+  if (!nombre) { toast('⚠ El nombre es obligatorio','#f59e0b'); return; }
+  const id = document.getElementById('editPacienteId').value;
+  const data = {
+    nombre,
+    dni: document.getElementById('pDni').value.trim(),
+    fecha_nacimiento: document.getElementById('pFechaNac').value || null,
+    edad: parseInt(document.getElementById('pEdad').value) || null,
+    motivo_evaluacion: document.getElementById('pMotivo').value.trim(),
+    observaciones: document.getElementById('pObs').value.trim()
+  };
+  try {
+    if (id) {
+      await supa('PATCH','pacientes',data,`?id=eq.${id}`);
+      toast('✓ Paciente actualizado');
+    } else {
+      data.codigo = generarCodigo();
+      data.fecha_registro = new Date().toISOString().split('T')[0];
+      await supa('POST','pacientes',data);
+      toast('✓ Paciente registrado');
+    }
+    cerrarModal('modalPaciente');
+    cargarPacientes();
+  } catch(e) { toast('⚠ Error al guardar: '+e.message,'#e11d48'); }
+}
+
+async function eliminarPaciente(id, nombre) {
+  if (!confirm(`¿Eliminar a "${nombre}"? Esta acción no se puede deshacer.`)) return;
+  try {
+    await supa('DELETE','pacientes','',`?id=eq.${id}`);
+    toast('✓ Paciente eliminado');
+    cargarPacientes();
+  } catch(e) { toast('⚠ Error al eliminar','#e11d48'); }
+}
+
+function editarPacienteActual() {
+  abrirModalPaciente(pacienteActual);
+}
+
+// ── CARPETA ──────────────────────────────────────────────────
+async function abrirCarpeta(id) {
+  pacienteActual = pacientes.find(p => p.id === id);
+  if (!pacienteActual) return;
+  const iniciales = pacienteActual.nombre.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('carpetaAvatar').textContent = iniciales;
+  document.getElementById('carpetaNombre').textContent = pacienteActual.nombre;
+  document.getElementById('carpetaMeta').textContent =
+    `${pacienteActual.codigo} · ${pacienteActual.edad ? pacienteActual.edad+' años' : 'Edad no registrada'} · Registrado: ${pacienteActual.fecha_registro ? new Date(pacienteActual.fecha_registro).toLocaleDateString('es-PE') : '—'}`;
+
+  // Render info grid
+  document.getElementById('infoGrid').innerHTML = `
+    <div class="info-item"><div class="info-item-label">Código</div><div class="info-item-val">${pacienteActual.codigo}</div></div>
+    <div class="info-item"><div class="info-item-label">DNI</div><div class="info-item-val">${pacienteActual.dni||'—'}</div></div>
+    <div class="info-item"><div class="info-item-label">Edad</div><div class="info-item-val">${pacienteActual.edad||'—'} años</div></div>
+    <div class="info-item"><div class="info-item-label">Fecha de Nacimiento</div><div class="info-item-val">${pacienteActual.fecha_nacimiento?new Date(pacienteActual.fecha_nacimiento).toLocaleDateString('es-PE'):'—'}</div></div>
+    <div class="info-item full"><div class="info-item-label">Motivo de Evaluación</div><div class="info-item-val">${pacienteActual.motivo_evaluacion||'—'}</div></div>
+    <div class="info-item full"><div class="info-item-label">Observaciones</div><div class="info-item-val">${pacienteActual.observaciones||'—'}</div></div>`;
+
+  // Reset tabs
+  document.querySelectorAll('.carpeta-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.carpeta-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('section-info').classList.add('active');
+  document.querySelector('.carpeta-tab').classList.add('active');
+
+  showPage('carpeta');
+  document.getElementById('pageTitle').textContent = pacienteActual.nombre;
+  document.getElementById('pageSub').textContent = 'Carpeta clínica del paciente';
+}
+
+// ── PRUEBAS ──────────────────────────────────────────────────
+function renderPruebas() {
+  document.getElementById('pruebasList').innerHTML = Object.entries(PRUEBAS).map(([key, p]) => `
+    <div class="prueba-card">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="prueba-icon" style="background:${p.color}">${p.emoji}</div>
+        <div><div class="prueba-name">${p.nombre}</div><div class="prueba-desc">${p.desc}</div></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="iniciarPrueba('${key}')">Aplicar</button>
+    </div>`).join('');
+}
+
+function iniciarPrueba(key) {
+  pruebaActiva = key;
+  respuestasActuales = {};
+  renderPregunta(0);
+  document.querySelectorAll('.carpeta-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.carpeta-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('section-prueba-activa').classList.add('active');
+}
+
+function renderPregunta(idx) {
+  const p = PRUEBAS[pruebaActiva];
+  const total = p.preguntas.length;
+  const pct = Math.round(idx/total*100);
+  document.getElementById('pruebaActivaCard').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:12px;color:var(--text-soft)">Pregunta ${idx+1} de ${total}</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="badge badge-rose">${p.nombre.split('(')[1]?.replace(')','') || p.nombre}</span>
+          <button class="btn btn-ghost btn-sm" onclick="cancelarPrueba()">✕ Cancelar</button>
+        </div>
+      </div>
+      <div style="background:var(--rose-light);border-radius:8px;height:6px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#f43f8e,#a855f7);border-radius:8px;transition:width .4s"></div>
+      </div>
+    </div>
+    <div style="background:var(--blush);border-radius:14px;padding:20px;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:600;color:var(--text);line-height:1.5">${idx+1}. ${p.preguntas[idx]}</div>
+    </div>
+    <div style="display:grid;gap:8px">
+      ${p.opciones.map((op,i) => `
+        <button onclick="seleccionarRespuesta(${idx},${i})" style="text-align:left;padding:12px 16px;border-radius:10px;border:1.5px solid ${respuestasActuales[idx]===i?'var(--rose)':'var(--border)'};background:${respuestasActuales[idx]===i?'var(--rose-light)':'white'};cursor:pointer;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;transition:all .15s">
+          ${op}
+        </button>`).join('')}
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:16px">
+      <button class="btn btn-ghost" ${idx===0?'disabled':''} onclick="renderPregunta(${idx-1})">‹ Anterior</button>
+      ${idx<total-1
+        ? `<button class="btn btn-primary" onclick="renderPregunta(${idx+1})" ${respuestasActuales[idx]===undefined?'':''}> Siguiente ›</button>`
+        : `<button class="btn btn-primary" onclick="finalizarPrueba()">✓ Finalizar Prueba</button>`}
+    </div>`;
+}
+
+function seleccionarRespuesta(idx, val) {
+  respuestasActuales[idx] = val;
+  renderPregunta(idx);
+}
+
+function cancelarPrueba() {
+  pruebaActiva = null;
+  respuestasActuales = {};
+  document.querySelectorAll('.carpeta-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.carpeta-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('section-pruebas').classList.add('active');
+  document.querySelectorAll('.carpeta-tab')[1].classList.add('active');
+  renderPruebas();
+}
+
+function finalizarPrueba() {
+  const p = PRUEBAS[pruebaActiva];
+  const score = Object.values(respuestasActuales).reduce((a,b)=>a+b,0);
+  const interp = p.interpretar(score);
+  // Save to localStorage as simple cache (complement to Supabase)
+  const resultado = { prueba: pruebaActiva, paciente_id: pacienteActual.id, score, nivel: interp.nivel, fecha: new Date().toISOString() };
+  const key = 'resultados_' + pacienteActual.id;
+  const prev = JSON.parse(localStorage.getItem(key)||'[]');
+  prev.unshift(resultado);
+  localStorage.setItem(key, JSON.stringify(prev));
+  mostrarResultado(resultado);
+}
+
+function mostrarResultado(res) {
+  const p = PRUEBAS[res.prueba];
+  const interp = p.interpretar(res.score);
+  document.querySelectorAll('.carpeta-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.carpeta-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('section-resultados').classList.add('active');
+  document.querySelectorAll('.carpeta-tab')[2].classList.add('active');
+  cargarResultados();
+  toast('✓ Prueba completada — Puntaje: '+res.score);
+}
+
+function cargarResultados() {
+  if (!pacienteActual) return;
+  const key = 'resultados_' + pacienteActual.id;
+  const resultados = JSON.parse(localStorage.getItem(key)||'[]');
+  const cont = document.getElementById('resultadosContent');
+  if (!resultados.length) {
+    cont.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><h3>Sin resultados aún</h3><p>Aplica una prueba para ver resultados aquí</p></div>';
+    return;
+  }
+  const ultimo = resultados[0];
+  const p = PRUEBAS[ultimo.prueba];
+  const interp = p.interpretar(ultimo.score);
+  cont.innerHTML = `
+    <div class="resultado-score">
+      <div style="font-size:13px;color:var(--text-soft);margin-bottom:8px">${p.nombre}</div>
+      <div class="score-num">${ultimo.score}</div>
+      <div class="score-label">Puntaje Total</div>
+      <div class="score-nivel ${interp.cls}" style="margin-top:8px">Nivel: ${interp.nivel}</div>
+      <div style="font-size:11px;color:var(--text-soft);margin-top:8px">${new Date(ultimo.fecha).toLocaleString('es-PE')}</div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-header"><div class="card-title">Historial de Evaluaciones</div></div>
+      <div>
+        ${resultados.map(r => {
+          const pr = PRUEBAS[r.prueba]; const it = pr.interpretar(r.score);
+          return `<div class="historial-row">
+            <span style="font-size:20px">${pr.emoji}</span>
+            <div style="flex:1"><div style="font-weight:600;font-size:13px">${pr.nombre.split('(')[0].trim()}</div><div style="font-size:11px;color:var(--text-soft)">${new Date(r.fecha).toLocaleDateString('es-PE')}</div></div>
+            <span style="font-size:18px;font-weight:700;color:var(--rose)">${r.score}</span>
+            <span class="badge ${it.cls==='nivel-leve'?'badge-green':it.cls==='nivel-moderado'?'badge-amber':'badge-rose'}">${r.nivel}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+// ── SESIONES ─────────────────────────────────────────────────
+async function cargarSesiones() {
+  if (!pacienteActual) return;
+  try {
+    sesionesActuales = await supa('GET','sesiones','',`?paciente_id=eq.${pacienteActual.id}&order=fecha.desc`);
+    renderSesiones();
+  } catch(e) {}
+}
+
+function renderSesiones() {
+  const cont = document.getElementById('sesionesList');
+  if (!sesionesActuales.length) {
+    cont.innerHTML = '<div class="empty"><div class="empty-icon">📅</div><h3>Sin sesiones</h3><p>Registra la primera sesión del paciente</p></div>';
+    return;
+  }
+  cont.innerHTML = sesionesActuales.map(s => `
+    <div class="historial-row">
+      <div style="text-align:center;background:var(--rose-light);border-radius:10px;padding:8px 12px;flex-shrink:0">
+        <div style="font-size:16px;font-weight:700;color:var(--rose)">${new Date(s.fecha).getDate()}</div>
+        <div style="font-size:10px;color:var(--text-soft)">${new Date(s.fecha).toLocaleString('es-PE',{month:'short'})}</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13px">${s.tipo}</div>
+        <div style="font-size:12px;color:var(--text-soft);margin-top:2px">${s.hora||''} ${s.notas?'· '+s.notas.slice(0,60)+'…':''}</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="eliminarSesion('${s.id}')">✕</button>
+    </div>`).join('');
+}
+
+function abrirModalSesion() {
+  document.getElementById('sFecha').value = new Date().toISOString().split('T')[0];
+  document.getElementById('sHora').value = '';
+  document.getElementById('sTipo').value = 'Evaluación inicial';
+  document.getElementById('sNotas').value = '';
+  document.getElementById('modalSesion').classList.add('open');
+}
+
+async function guardarSesion() {
+  const fecha = document.getElementById('sFecha').value;
+  if (!fecha) { toast('⚠ La fecha es obligatoria','#f59e0b'); return; }
+  try {
+    await supa('POST','sesiones',{
+      paciente_id: pacienteActual.id,
+      fecha,
+      hora: document.getElementById('sHora').value || null,
+      tipo: document.getElementById('sTipo').value,
+      notas: document.getElementById('sNotas').value.trim()
+    });
+    cerrarModal('modalSesion');
+    cargarSesiones();
+    actualizarStats();
+    toast('✓ Sesión registrada');
+  } catch(e) { toast('⚠ Error al guardar sesión','#e11d48'); }
+}
+
+async function eliminarSesion(id) {
+  if (!confirm('¿Eliminar esta sesión?')) return;
+  await supa('DELETE','sesiones','',`?id=eq.${id}`);
+  cargarSesiones();
+  toast('✓ Sesión eliminada');
+}
+
+// ── NOTAS ────────────────────────────────────────────────────
+async function cargarNotas() {
+  if (!pacienteActual) return;
+  try {
+    notasActuales = await supa('GET','notas','',`?paciente_id=eq.${pacienteActual.id}&order=fecha.desc`);
+    renderNotas();
+  } catch(e) {}
+}
+
+function renderNotas() {
+  const cont = document.getElementById('notasList');
+  if (!notasActuales.length) {
+    cont.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><h3>Sin notas</h3><p>Agrega notas clínicas del paciente</p></div>';
+    return;
+  }
+  cont.innerHTML = notasActuales.map((n,i) => `
+    <div class="nota-card ${i%2?'morada':''}">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="nota-fecha">${new Date(n.fecha).toLocaleString('es-PE')}</div>
+        <button class="btn btn-danger btn-sm" style="padding:2px 8px;font-size:11px" onclick="eliminarNota('${n.id}')">✕</button>
+      </div>
+      <div class="nota-texto">${n.contenido}</div>
+    </div>`).join('');
+}
+
+async function guardarNota() {
+  const texto = document.getElementById('notaTexto').value.trim();
+  if (!texto) { toast('⚠ Escribe algo antes de guardar','#f59e0b'); return; }
+  try {
+    await supa('POST','notas',{ paciente_id: pacienteActual.id, contenido: texto });
+    document.getElementById('notaTexto').value = '';
+    cargarNotas();
+    actualizarStats();
+    toast('✓ Nota guardada');
+  } catch(e) { toast('⚠ Error al guardar nota','#e11d48'); }
+}
+
+async function eliminarNota(id) {
+  await supa('DELETE','notas','',`?id=eq.${id}`);
+  cargarNotas();
+  toast('✓ Nota eliminada');
+}
+
+// ── CALENDARIO ───────────────────────────────────────────────
+function renderCalendario() {
+  const y = calFecha.getFullYear(), m = calFecha.getMonth();
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('calMesAnio').textContent = meses[m] + ' ' + y;
+  const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const firstDay = new Date(y,m,1).getDay();
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const today = new Date();
+  let html = dias.map(d=>`<div class="cal-header-day">${d}</div>`).join('');
+  for (let i=0;i<firstDay;i++) html += `<div class="cal-day other-month"></div>`;
+  for (let d=1;d<=daysInMonth;d++) {
+    const isToday = d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear();
+    html += `<div class="cal-day${isToday?' today':''}" onclick="verDia(${d},${m},${y})">${d}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+}
+
+function cambiarMes(dir) {
+  calFecha.setMonth(calFecha.getMonth()+dir);
+  renderCalendario();
+}
+
+async function verDia(d,m,y) {
+  const fecha = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  try {
+    const ses = await supa('GET','sesiones','',`?fecha=eq.${fecha}`);
+    const cont = document.getElementById('calEventos');
+    if (!ses.length) { cont.innerHTML = `<div class="card"><div style="text-align:center;padding:20px;color:var(--text-soft);font-size:13px">Sin sesiones el ${d}/${m+1}/${y}</div></div>`; return; }
+    cont.innerHTML = `<div class="card"><div class="card-title" style="margin-bottom:12px">Sesiones del ${d}/${m+1}/${y}</div>${ses.map(s=>`
+      <div class="historial-row">
+        <span style="font-size:20px">📅</span>
+        <div style="flex:1"><div style="font-weight:600;font-size:13px">${s.tipo}</div><div style="font-size:11px;color:var(--text-soft)">${s.hora||'Sin hora'}</div></div>
+      </div>`).join('')}</div>`;
+  } catch(e){}
+}
+
+// ── REPORTES ─────────────────────────────────────────────────
+function renderReportes() {
+  const rangos = {'0-10':0,'11-20':0,'21-30':0,'31-40':0,'41-50':0,'51+':0};
+  pacientes.forEach(p => {
+    const e = p.edad||0;
+    if(e<=10) rangos['0-10']++;
+    else if(e<=20) rangos['11-20']++;
+    else if(e<=30) rangos['21-30']++;
+    else if(e<=40) rangos['31-40']++;
+    else if(e<=50) rangos['41-50']++;
+    else rangos['51+']++;
+  });
+  const ctx = document.getElementById('reporteChart');
+  if (ctx._chart) ctx._chart.destroy();
+  ctx._chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(rangos),
+      datasets: [{
+        label: 'Pacientes',
+        data: Object.values(rangos),
+        backgroundColor: ['#fce7f3','#f5f3ff','#fce7f3','#f5f3ff','#fce7f3','#f5f3ff'],
+        borderColor: ['#f43f8e','#a855f7','#ec4899','#8b5cf6','#f43f8e','#a855f7'],
+        borderWidth: 2, borderRadius: 8, borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#fce7f3' }, ticks: { color: '#9d6b80' } },
+        y: { grid: { color: '#fce7f3' }, ticks: { color: '#9d6b80', stepSize: 1 } }
+      }
+    }
+  });
+}
+
+// ── UTILS ────────────────────────────────────────────────────
+function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+});
+
+function toast(msg, bg='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  if (bg) t.style.background = bg;
+  else t.style.background = 'linear-gradient(135deg,#f43f8e,#ec4899)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+showPage('pacientes');
+cargarPacientes();
+</script>
+</body>
+</html>
